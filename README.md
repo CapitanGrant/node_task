@@ -16,12 +16,13 @@
 
 ### 2. Настройте переменные окружения
 
-
+```
 DB_USER=postgres_user
 DB_PASSWORD=postgres_password
 DB_HOST=localhost
 DB_PORT=5433
 DB_NAME=postgres_db
+```
 
 ### 3. Соберите и запустите контейнеры
 ```bash
