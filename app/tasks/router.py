@@ -8,6 +8,7 @@ from sqlalchemy.future import select
 from loguru import logger
 
 from app.dao.session_maker import SessionDep, TransactionSessionDep
+from app.services.auth_dep import get_current_user
 from app.tasks.dao import TasksDAO
 from app.tasks.schemas import STaskCreate, STaskBase, STaskID, STaskUpdate, STaskStatus, TaskFilter
 
@@ -17,13 +18,15 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
 @router.get('/all_tasks/', summary='Получение списка всех задач')
-async def get_all_tasks(status: Optional[STaskStatus] = Query(default=None), session: AsyncSession = SessionDep):
+async def get_all_tasks(status: Optional[STaskStatus] = Query(default=None), user: dict = Depends(get_current_user),
+                        session: AsyncSession = SessionDep):
     filters = TaskFilter(status=status)
     return await TasksDAO.find_all(session=session, filters=filters)
 
 
 @router.post("/create_tasks/", summary='Добавление задачи')
-async def create_tasks(task_data: STaskCreate, session: AsyncSession = TransactionSessionDep):
+async def create_tasks(task_data: STaskCreate, user: dict = Depends(get_current_user),
+                       session: AsyncSession = TransactionSessionDep):
     try:
         task_data_dict = task_data.model_dump()
         new_task = await TasksDAO.add(session=session, values=STaskBase(**task_data_dict))
